@@ -1,12 +1,14 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const router = express.Router();
 
 const User = require('../model/user');
+const auth = require('../config/token');
 
 //Get all the users
-router.get('/',(req,res,next)=>{
+router.get('/',auth,(req,res,next)=>{
     User.find()
     .exec()
     .then(data=>{
@@ -55,7 +57,9 @@ router.post("/login",(req,res,next)=>{
                 return res.status(500).json({error:err});
             }else{
                 if(data){
-                    return res.status(200).json({msg:"This is a secreat msg"});
+                    // the token secret key is created and expire times set//
+                    const token = jwt.sign({id:user[0]._id},'citicollege',{expiresIn:'1hr'});
+                    return res.status(200).json({msg:'Auth successful',token:token});
                 }else{
                     return res.status(404).json({msg:"Auth failed"});
                 }    
